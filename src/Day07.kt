@@ -1,29 +1,25 @@
 fun main() {
 
     data class Calculations(val result: Long, val list: List<Long>) {
-        fun possible(): Boolean {
+        fun possible(f: (Long, Long) -> List<Long>): Boolean {
             var possibleResults = listOf<Long>(list[0]);
-            list.drop(1).forEach { t ->
-                possibleResults = possibleResults.map { listOf(it + t, it * t) }.flatten()
-            }
-            return possibleResults.any { it == result }
-        }
-
-        fun possiblePart2(): Boolean {
-            var possibleResults = listOf<Long>(list[0]);
-            list.drop(1).forEach { t ->
-                possibleResults = possibleResults.map { listOf(it + t, it * t, (it.toString() + t.toString()).toLong())}.flatten()
+            list.drop(1).forEach { newValue ->
+                possibleResults = possibleResults.map { f(it, newValue) }.flatten()
             }
             return possibleResults.any { it == result }
         }
     }
 
     fun part1(calculations: List<Calculations>): Long {
-        return calculations.filter { it.possible() }.sumOf { it.result }
+        return calculations
+            .filter { it.possible { p1, p2 -> listOf(p1 + p2, p1 * p2) } }
+            .sumOf { it.result }
     }
 
     fun part2(calculations: List<Calculations>): Long {
-        return calculations.filter { it.possiblePart2() }.sumOf { it.result }
+        return calculations
+            .filter { it.possible { p1, p2 -> listOf(p1 + p2, p1 * p2, "$p1$p2".toLong()) } }
+            .sumOf { it.result }
     }
 
     fun parse(input: List<String>): List<Calculations> {
